@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { logWarn } from "../utils/logger";
 
 export type ImagePreviewModalProps = {
   imagePath: string;
@@ -22,14 +23,16 @@ export function ImagePreviewModal({ imagePath, onClose }: ImagePreviewModalProps
         if (!isActive) return;
         setImageSrc(`data:image/png;base64,${base64}`);
       } catch (error) {
-        console.error("Failed to load capture preview:", error);
+        logWarn("Failed to load capture preview", error);
         if (isActive) {
           setLoadError("Could not load preview image.");
         }
       }
     };
 
-    loadPreview().catch(console.error);
+    loadPreview().catch((error) => {
+      logWarn("Unexpected preview load error", error);
+    });
 
     return () => {
       isActive = false;

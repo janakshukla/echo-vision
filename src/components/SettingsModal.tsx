@@ -4,9 +4,15 @@ type SettingsModalProps = {
   activePrompt: string;
   saveMessage: string;
   errorMessage: string;
+  shortcutValue: string;
+  shortcutMessage: string;
+  shortcutError: string;
   onDraftChange: (value: string) => void;
   onSave: () => void;
   onReset: () => void;
+  onShortcutChange: (value: string) => void;
+  onSaveShortcut: () => void;
+  onResetShortcut: () => void;
   onOpenSuggestions: () => void;
   onClose: () => void;
 };
@@ -17,9 +23,15 @@ export function SettingsModal({
   activePrompt,
   saveMessage,
   errorMessage,
+  shortcutValue,
+  shortcutMessage,
+  shortcutError,
   onDraftChange,
   onSave,
   onReset,
+  onShortcutChange,
+  onSaveShortcut,
+  onResetShortcut,
   onOpenSuggestions,
   onClose,
 }: SettingsModalProps) {
@@ -85,6 +97,35 @@ export function SettingsModal({
 
           {saveMessage && <p className="text-sm text-blue-700">{saveMessage}</p>}
           {errorMessage && <p className="text-sm text-slate-700">{errorMessage}</p>}
+
+          <div className="border-t border-slate-200 pt-4 mt-2">
+            <p className="text-sm font-semibold text-slate-700">Analyze Shortcut</p>
+            <p className="text-xs text-slate-500 mt-1">Example: CommandOrControl+Shift+2</p>
+            <input
+              type="text"
+              value={shortcutValue}
+              onChange={(e) => onShortcutChange(e.target.value)}
+              className="mt-2 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <div className="mt-2 flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={onSaveShortcut}
+                className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-3 py-2 rounded-md"
+              >
+                Save Shortcut
+              </button>
+              <button
+                type="button"
+                onClick={onResetShortcut}
+                className="bg-slate-700 hover:bg-slate-800 text-white text-sm font-semibold px-3 py-2 rounded-md"
+              >
+                Reset Shortcut
+              </button>
+            </div>
+            {shortcutMessage && <p className="text-sm text-blue-700 mt-2">{shortcutMessage}</p>}
+            {shortcutError && <p className="text-sm text-slate-700 mt-2">{shortcutError}</p>}
+          </div>
         </div>
       </div>
     </div>

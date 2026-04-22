@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import type { CaptureRecord } from "../components/types";
+import { logError } from "../utils/logger";
 
 export function useCaptureHistory(windowLabel: string, isConfigured: boolean) {
   const [history, setHistory] = useState<CaptureRecord[]>([]);
@@ -18,7 +19,7 @@ export function useCaptureHistory(windowLabel: string, isConfigured: boolean) {
       const records = await invoke<CaptureRecord[]>("list_capture_records");
       setHistory(records);
     } catch (error) {
-      console.error("Failed to load capture history:", error);
+      logError("Failed to load capture history", error);
       setHistoryError("Could not load history.");
     } finally {
       setIsHistoryLoading(false);
@@ -30,7 +31,7 @@ export function useCaptureHistory(windowLabel: string, isConfigured: boolean) {
       await invoke<boolean>("delete_capture_record", { captureId });
       setHistory((prev) => prev.filter((item) => item.id !== captureId));
     } catch (error) {
-      console.error("Failed to delete history item:", error);
+      logError("Failed to delete history item", error);
       setHistoryError("Could not delete history item.");
     }
   };

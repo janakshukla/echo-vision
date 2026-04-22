@@ -7,6 +7,7 @@ import {
   resetMasterPromptInStorage,
   saveMasterPromptToStorage,
 } from "../utils/promptStorage";
+import { logError } from "../utils/logger";
 
 export function useMasterPrompt(apiKey: string) {
   const [masterPrompt, setMasterPrompt] = useState(DEFAULT_MASTER_PROMPT);
@@ -44,7 +45,7 @@ export function useMasterPrompt(apiKey: string) {
       setSettingsError("");
       setSettingsMessage("Master prompt saved.");
     } catch (error) {
-      console.error("Failed to save master prompt:", error);
+      logError("Failed to save master prompt", error);
       setSettingsMessage("");
       setSettingsError("Could not save prompt. Please try again.");
     }
@@ -58,7 +59,7 @@ export function useMasterPrompt(apiKey: string) {
       setSettingsError("");
       setSettingsMessage("Prompt reset to default.");
     } catch (error) {
-      console.error("Failed to reset prompt:", error);
+      logError("Failed to reset prompt", error);
       setSettingsMessage("");
       setSettingsError("Could not reset prompt.");
     }
@@ -104,7 +105,7 @@ export function useMasterPrompt(apiKey: string) {
 
       setSuggestions(parsed);
     } catch (error) {
-      console.error("Failed to generate prompt suggestions:", error);
+      logError("Failed to generate prompt suggestions", error);
       setSuggestionsError("Could not generate suggestions right now.");
     } finally {
       setIsSuggestionsLoading(false);
@@ -123,7 +124,7 @@ export function useMasterPrompt(apiKey: string) {
       await navigator.clipboard.writeText(suggestion);
       setSettingsMessage("Suggestion copied to clipboard.");
     } catch (error) {
-      console.error("Failed to copy suggestion:", error);
+      logError("Failed to copy suggestion", error);
       setSuggestionsError("Could not copy to clipboard.");
     }
   };

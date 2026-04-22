@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import type { Region } from "./types";
+import { logError, logWarnThrottled } from "../utils/logger";
 
 const PENDING_REGION_KEY = "echovision_pending_region";
 const OVERLAY_CLOSE_REQUEST_KEY = "echovision_overlay_close_request";
@@ -22,11 +23,15 @@ export function OverlayUI({ onClosed }: OverlayUIProps) {
 
     try {
       const current = getCurrentWindow();
-      await current.setAlwaysOnTop(false).catch(console.error);
-      await current.hide().catch(console.error);
+      await current.setAlwaysOnTop(false).catch((error) => {
+        logWarnThrottled("overlay-on-top", "Overlay always-on-top reset failed", error);
+      });
+      await current.hide().catch((error) => {
+        logWarnThrottled("overlay-hide", "Overlay hide failed", error);
+      });
       await current.close();
     } catch (error) {
-      console.error("Failed to close overlay window:", error);
+      logError("Failed to close overlay window", error);
     } finally {
       onClosed?.();
     }
@@ -49,7 +54,7 @@ export function OverlayUI({ onClosed }: OverlayUIProps) {
         localStorage.setItem(PENDING_REGION_KEY, JSON.stringify(region));
       }
     } catch (error) {
-      console.error("Failed to persist selected region:", error);
+      logError("Failed to persist selected region", error);
     } finally {
       setTimeout(() => {
         closeOverlay();
@@ -58,9 +63,13 @@ export function OverlayUI({ onClosed }: OverlayUIProps) {
   };
 
   useEffect(() => {
-    getCurrentWindow().setFocus().catch(console.error);
+    getCurrentWindow().setFocus().catch((error) => {
+      logWarnThrottled("overlay-focus", "Overlay focus failed", error);
+    });
     const focusRetry = setTimeout(() => {
-      getCurrentWindow().setFocus().catch(console.error);
+      getCurrentWindow().setFocus().catch((error) => {
+        logWarnThrottled("overlay-focus-retry", "Overlay focus retry failed", error);
+      });
     }, 120);
 
     const handleKeyDown = (e: KeyboardEvent) => {
