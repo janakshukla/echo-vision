@@ -50,7 +50,7 @@ export function HistoryPanel({
                     onClick={() => onOpenCapture(item.image_path)}
                     className="history-btn-open text-sm font-medium px-3 py-1.5 rounded-md"
                   >
-                    Open Image
+                    View Image
                   </button>
                   <button
                     type="button"

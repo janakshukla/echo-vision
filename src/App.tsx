@@ -4,8 +4,8 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { register, unregister, isRegistered } from "@tauri-apps/plugin-global-shortcut";
-import { openPath } from "@tauri-apps/plugin-opener";
 import { MainScreen } from "./components/MainScreen";
+import { ImagePreviewModal } from "./components/ImagePreviewModal";
 import { OverlayUI } from "./components/OverlayUI";
 import { SettingsScreen } from "./components/SettingsScreen";
 import type { CaptureRecord, Region } from "./components/types";
@@ -23,6 +23,7 @@ export default function App() {
   const [history, setHistory] = useState<CaptureRecord[]>([]);
   const [isHistoryLoading, setIsHistoryLoading] = useState(false);
   const [historyError, setHistoryError] = useState("");
+  const [selectedCapturePath, setSelectedCapturePath] = useState("");
 
   const invokeCaptureWithTimeout = (
     region: { x?: number; y?: number; width?: number; height?: number },
@@ -71,12 +72,8 @@ export default function App() {
   };
 
   const handleOpenCapture = async (imagePath: string) => {
-    try {
-      await openPath(imagePath);
-    } catch (error) {
-      console.error("Failed to open capture image:", error);
-      setHistoryError("Could not open image file.");
-    }
+    setHistoryError("");
+    setSelectedCapturePath(imagePath);
   };
 
   const handleAnalyze = async (cropX?: number, cropY?: number, cropW?: number, cropH?: number) => {
@@ -247,17 +244,25 @@ export default function App() {
   }
 
   return (
-    <MainScreen
-      status={status}
-      persistenceNote={persistenceNote}
-      history={history}
-      isHistoryLoading={isHistoryLoading}
-      historyError={historyError}
-      onReadFullScreen={() => handleAnalyze()}
-      onSnipRegion={startSnipping}
-      onRefreshHistory={() => loadCaptureHistory()}
-      onOpenCapture={handleOpenCapture}
-      onDeleteHistoryItem={handleDeleteHistoryItem}
-    />
+    <>
+      <MainScreen
+        status={status}
+        persistenceNote={persistenceNote}
+        history={history}
+        isHistoryLoading={isHistoryLoading}
+        historyError={historyError}
+        onReadFullScreen={() => handleAnalyze()}
+        onSnipRegion={startSnipping}
+        onRefreshHistory={() => loadCaptureHistory()}
+        onOpenCapture={handleOpenCapture}
+        onDeleteHistoryItem={handleDeleteHistoryItem}
+      />
+      {selectedCapturePath && (
+        <ImagePreviewModal
+          imagePath={selectedCapturePath}
+          onClose={() => setSelectedCapturePath("")}
+        />
+      )}
+    </>
   );
 }

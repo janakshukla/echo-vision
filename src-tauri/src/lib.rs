@@ -93,6 +93,12 @@ fn list_capture_records(app: tauri::AppHandle) -> Result<Vec<db::CaptureRecord>,
 }
 
 #[tauri::command]
+fn read_capture_image(image_path: String) -> Result<String, String> {
+    let image_bytes = fs::read(&image_path).map_err(|e| e.to_string())?;
+    Ok(BASE64_STANDARD.encode(image_bytes))
+}
+
+#[tauri::command]
 fn delete_capture_record(app: tauri::AppHandle, capture_id: i64) -> Result<bool, String> {
     let app_data_dir = app
         .path()
@@ -126,6 +132,7 @@ pub fn run() {
             capture_screen,
             save_capture_record,
             list_capture_records,
+            read_capture_image,
             delete_capture_record
         ])
         .run(tauri::generate_context!())
