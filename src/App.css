@@ -5,3 +5,34 @@
 html, body {
   background-color: transparent !important;
 }
+
+#root {
+  min-height: 100vh;
+}
+
+.history-panel {
+  max-height: 42vh;
+}
+
+.history-body {
+  overflow-y: auto;
+  max-height: calc(42vh - 56px);
+}
+
+.history-btn-open {
+  background: #0ea5e9;
+  color: #ffffff;
+}
+
+.history-btn-open:hover {
+  background: #0284c7;
+}
+
+.history-btn-delete {
+  background: #ef4444;
+  color: #ffffff;
+}
+
+.history-btn-delete:hover {
+  background: #dc2626;
+}

@@ -19,10 +19,10 @@ This file tracks what is completed and what is still pending for local capture h
 | 2 | Create DB module and schema (id, image_path, response_text, created_at) | [x] Done | [ ] Verified | Added src-tauri/src/db.rs with captures table creation and wired into startup; cargo check -q passed (CHECK_OK) |
 | 3 | Implement save capture command (base64 -> PNG file + DB insert) | [x] Done | [ ] Verified | Added save_capture_record command and db insert helper; writes PNG to app local captures folder and returns row id; cargo check -q passed (CHECK_OK) |
 | 4 | Implement list and delete commands | [x] Done | [ ] Verified | Added list_capture_records and delete_capture_record commands; delete removes DB row and image file; cargo check -q passed (CHECK_OK) |
-| 5 | Integrate save flow in frontend capture pipeline | [ ] Pending | [ ] Verified | Save after AI response generation |
-| 6 | Add history UI panel (list/open/delete) | [ ] Pending | [ ] Verified | UI in src/App.tsx and styles in src/App.css |
-| 7 | Add resilience and non-blocking error handling | [ ] Pending | [ ] Verified | Capture flow should continue if save fails |
-| 8 | Run end-to-end verification and build checks | [ ] Pending | [ ] Verified | Restart persistence + delete checks + build passes |
+| 5 | Integrate save flow in frontend capture pipeline | [x] Done | [ ] Verified | Added save_capture_record invoke after AI response and history reload in src/App.tsx |
+| 6 | Add history UI panel (list/open/delete) | [x] Done | [ ] Verified | Added history list, refresh, open image, and delete actions in src/App.tsx with styles in src/App.css |
+| 7 | Add resilience and non-blocking error handling | [x] Done | [ ] Verified | Save errors now show non-blocking note while keeping capture/AI flow active |
+| 8 | Run end-to-end verification and build checks | [~] In progress | [ ] Verified | Build checks passed: pnpm build OK and cargo check -q CHECK_OK; runtime manual checks still pending (capture/restart/delete) |
 
 ## Verification Steps You Can Use
 1. Run capture 3 times and confirm 3 history items appear.
