@@ -18,9 +18,9 @@ export function HistoryPanel({
   onDeleteHistoryItem,
 }: HistoryPanelProps) {
   return (
-    <section className="history-panel mt-6 w-full max-w-2xl bg-white rounded-xl shadow border border-gray-200">
-      <div className="history-header px-4 py-3 border-b border-gray-200 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-800">Capture History</h2>
+    <section className="history-panel mt-6 w-full max-w-2xl bg-white rounded-xl shadow border border-slate-200">
+      <div className="history-header px-4 py-3 border-b border-slate-200 flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-slate-800">Capture History</h2>
         <button
           type="button"
           onClick={onRefresh}
@@ -31,19 +31,19 @@ export function HistoryPanel({
       </div>
 
       <div className="history-body p-3">
-        {isLoading && <p className="text-sm text-gray-500">Loading history...</p>}
-        {!isLoading && errorMessage && <p className="text-sm text-red-600">{errorMessage}</p>}
+        {isLoading && <p className="text-sm text-slate-500">Loading history...</p>}
+        {!isLoading && errorMessage && <p className="text-sm text-slate-700">{errorMessage}</p>}
 
         {!isLoading && !errorMessage && history.length === 0 && (
-          <p className="text-sm text-gray-500">No captures saved yet.</p>
+          <p className="text-sm text-slate-500">No captures saved yet.</p>
         )}
 
         {!isLoading && !errorMessage && history.length > 0 && (
           <ul className="history-list flex flex-col gap-3">
             {history.map((item) => (
-              <li key={item.id} className="history-item border border-gray-200 rounded-lg p-3 bg-gray-50">
-                <p className="text-xs text-gray-500">{new Date(item.created_at).toLocaleString()}</p>
-                <p className="text-sm text-gray-800 mt-1 whitespace-pre-wrap wrap-break-word">{item.response_text}</p>
+              <li key={item.id} className="history-item border border-slate-200 rounded-lg p-3 bg-slate-50">
+                <p className="text-xs text-slate-500">{new Date(item.created_at).toLocaleString()}</p>
+                <p className="text-sm text-slate-800 mt-1 whitespace-pre-wrap wrap-break-word">{item.response_text}</p>
                 <div className="mt-3 flex gap-2">
                   <button
                     type="button"

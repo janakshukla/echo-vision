@@ -127,21 +127,21 @@ export function OverlayUI({ onClosed }: OverlayUIProps) {
         closeOverlay();
       }}
     >
-      <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-80 text-white px-4 py-2 rounded shadow-lg pointer-events-none">
+      <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-slate-900/80 text-white px-4 py-2 rounded shadow-lg pointer-events-none">
         Drag to select a region. Press <strong>Esc</strong> to cancel.
       </div>
 
       <button
         type="button"
         onClick={closeOverlay}
-        className="absolute top-4 right-4 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold px-3 py-2 rounded"
+        className="absolute top-4 right-4 bg-slate-700 hover:bg-slate-800 text-white text-sm font-semibold px-3 py-2 rounded"
       >
         Cancel
       </button>
 
       {isDrawing && (
         <div
-          className="absolute border-2 border-purple-500 bg-purple-500/20"
+          className="absolute border-2 border-blue-500 bg-blue-500/20"
           style={{ left, top, width, height }}
         />
       )}

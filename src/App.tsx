@@ -1,14 +1,20 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { register, unregister, isRegistered } from "@tauri-apps/plugin-global-shortcut";
+import { DEFAULT_MASTER_PROMPT } from "./components/constants";
 import { MainScreen } from "./components/MainScreen";
 import { ImagePreviewModal } from "./components/ImagePreviewModal";
 import { OverlayUI } from "./components/OverlayUI";
+import { PromptSuggestionsModal } from "./components/PromptSuggestionsModal";
+import { SettingsModal } from "./components/SettingsModal";
 import { SettingsScreen } from "./components/SettingsScreen";
-import type { CaptureRecord, Region } from "./components/types";
+import type { Region } from "./components/types";
+import { useCaptureHistory } from "./hooks/useCaptureHistory";
+import { useMasterPrompt } from "./hooks/useMasterPrompt";
+import { invokeCaptureWithTimeout, speakResponse } from "./utils/analysis";
 import "./App.css";
 
 const PENDING_REGION_KEY = "echovision_pending_region";
@@ -20,61 +26,41 @@ export default function App() {
   const [status, setStatus] = useState("Ready");
   const [windowLabel] = useState(() => getCurrentWindow().label);
   const [persistenceNote, setPersistenceNote] = useState("");
-  const [history, setHistory] = useState<CaptureRecord[]>([]);
-  const [isHistoryLoading, setIsHistoryLoading] = useState(false);
-  const [historyError, setHistoryError] = useState("");
-  const [selectedCapturePath, setSelectedCapturePath] = useState("");
+  const {
+    history,
+    isHistoryLoading,
+    historyError,
+    selectedCapturePath,
+    loadCaptureHistory,
+    handleDeleteHistoryItem,
+    openCapturePreview,
+    closeCapturePreview,
+  } = useCaptureHistory(windowLabel, isConfigured);
 
-  const invokeCaptureWithTimeout = (
-    region: { x?: number; y?: number; width?: number; height?: number },
-    timeoutMs = 8000,
-  ) => {
-    return Promise.race([
-      invoke<string>("capture_screen", region),
-      new Promise<string>((_, reject) => {
-        setTimeout(() => reject(new Error("Screen capture timed out.")), timeoutMs);
-      }),
-    ]);
-  };
-
-  const speak = (text: string) => {
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 1.1;
-    window.speechSynthesis.speak(utterance);
-  };
-
-  const loadCaptureHistory = async () => {
-    if (windowLabel !== "main" || !isConfigured) return;
-
-    setIsHistoryLoading(true);
-    setHistoryError("");
-
-    try {
-      const records = await invoke<CaptureRecord[]>("list_capture_records");
-      setHistory(records);
-    } catch (error) {
-      console.error("Failed to load capture history:", error);
-      setHistoryError("Could not load history.");
-    } finally {
-      setIsHistoryLoading(false);
-    }
-  };
-
-  const handleDeleteHistoryItem = async (captureId: number) => {
-    try {
-      await invoke<boolean>("delete_capture_record", { captureId });
-      setHistory((prev) => prev.filter((item) => item.id !== captureId));
-    } catch (error) {
-      console.error("Failed to delete history item:", error);
-      setHistoryError("Could not delete history item.");
-    }
-  };
-
-  const handleOpenCapture = async (imagePath: string) => {
-    setHistoryError("");
-    setSelectedCapturePath(imagePath);
-  };
+  const {
+    masterPrompt,
+    draftPrompt,
+    isSettingsOpen,
+    settingsError,
+    settingsMessage,
+    isSuggestionsOpen,
+    suggestions,
+    suggestionsError,
+    isSuggestionsLoading,
+    initializeMasterPrompt,
+    setDraftPrompt,
+    setSettingsError,
+    setSettingsMessage,
+    openSettings,
+    closeSettings,
+    savePrompt,
+    resetPrompt,
+    openSuggestions,
+    closeSuggestions,
+    fetchSuggestions,
+    applySuggestion,
+    copySuggestion,
+  } = useMasterPrompt(apiKey);
 
   const handleAnalyze = async (cropX?: number, cropY?: number, cropW?: number, cropH?: number) => {
     try {
@@ -91,14 +77,13 @@ export default function App() {
       const imagePart = { inlineData: { data: base64Image, mimeType: "image/png" } };
       const genAI = new GoogleGenerativeAI(apiKey || localStorage.getItem("echovision_api_key") || "");
       const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-      const prompt =
-        "You are a highly efficient screen reader assistant. Briefly describe the most important thing on this screen in 1 sentence only. If there is a clear error message or code block, read the specific problem.";
+      const prompt = masterPrompt?.trim() || DEFAULT_MASTER_PROMPT;
 
       const result = await model.generateContent([prompt, imagePart]);
       const responseText = result.response.text();
 
       setStatus("Done!");
-      speak(responseText);
+      speakResponse(responseText);
 
       if (base64Image && responseText.trim()) {
         try {
@@ -115,7 +100,7 @@ export default function App() {
     } catch (error) {
       console.error("Analysis Error:", error);
       setStatus("Capture failed or timed out.");
-      speak("Sorry, screen capture failed. Please try snipping again.");
+      speakResponse("Sorry, screen capture failed. Please try snipping again.");
     }
   };
 
@@ -150,6 +135,7 @@ export default function App() {
       setApiKey(savedKey);
       setIsConfigured(true);
     }
+    initializeMasterPrompt();
 
     const setupShortcut = async () => {
       try {
@@ -251,16 +237,46 @@ export default function App() {
         history={history}
         isHistoryLoading={isHistoryLoading}
         historyError={historyError}
+        onOpenSettings={openSettings}
         onReadFullScreen={() => handleAnalyze()}
         onSnipRegion={startSnipping}
         onRefreshHistory={() => loadCaptureHistory()}
-        onOpenCapture={handleOpenCapture}
+        onOpenCapture={openCapturePreview}
         onDeleteHistoryItem={handleDeleteHistoryItem}
       />
+
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        draftPrompt={draftPrompt}
+        activePrompt={masterPrompt}
+        saveMessage={settingsMessage}
+        errorMessage={settingsError}
+        onDraftChange={(value) => {
+          setDraftPrompt(value);
+          setSettingsMessage("");
+          setSettingsError("");
+        }}
+        onSave={savePrompt}
+        onReset={resetPrompt}
+        onOpenSuggestions={openSuggestions}
+        onClose={closeSettings}
+      />
+
+      <PromptSuggestionsModal
+        isOpen={isSuggestionsOpen}
+        isLoading={isSuggestionsLoading}
+        suggestions={suggestions}
+        errorMessage={suggestionsError}
+        onClose={closeSuggestions}
+        onFetch={fetchSuggestions}
+        onApply={applySuggestion}
+        onCopy={copySuggestion}
+      />
+
       {selectedCapturePath && (
         <ImagePreviewModal
           imagePath={selectedCapturePath}
-          onClose={() => setSelectedCapturePath("")}
+          onClose={closeCapturePreview}
         />
       )}
     </>

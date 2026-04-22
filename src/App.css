@@ -20,19 +20,19 @@ html, body {
 }
 
 .history-btn-open {
-  background: #0ea5e9;
+  background: #2563eb;
   color: #ffffff;
 }
 
 .history-btn-open:hover {
-  background: #0284c7;
+  background: #1d4ed8;
 }
 
 .history-btn-delete {
-  background: #ef4444;
+  background: #475569;
   color: #ffffff;
 }
 
 .history-btn-delete:hover {
-  background: #dc2626;
+  background: #334155;
 }

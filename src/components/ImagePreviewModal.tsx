@@ -37,25 +37,25 @@ export function ImagePreviewModal({ imagePath, onClose }: ImagePreviewModalProps
   }, [imagePath]);
 
   return (
-    <div className="fixed inset-0 z-10000 bg-black/70 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-10000 bg-slate-900/70 flex items-center justify-center p-4">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl overflow-hidden">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">Capture Preview</h3>
-            <p className="text-xs text-gray-500 break-all">{imagePath}</p>
+            <h3 className="text-lg font-semibold text-slate-900">Capture Preview</h3>
+            <p className="text-xs text-slate-500 break-all">{imagePath}</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="bg-gray-900 hover:bg-gray-800 text-white text-sm font-semibold px-3 py-2 rounded-md"
+            className="bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold px-3 py-2 rounded-md"
           >
             Close
           </button>
         </div>
 
-        <div className="bg-gray-950 flex items-center justify-center p-4 max-h-[80vh] overflow-auto min-h-[30vh]">
+        <div className="bg-slate-900 flex items-center justify-center p-4 max-h-[80vh] overflow-auto min-h-[30vh]">
           {loadError ? (
-            <p className="text-sm text-red-300">{loadError}</p>
+            <p className="text-sm text-slate-300">{loadError}</p>
           ) : imageSrc ? (
             <img
               src={imageSrc}
@@ -63,7 +63,7 @@ export function ImagePreviewModal({ imagePath, onClose }: ImagePreviewModalProps
               className="max-w-full max-h-[75vh] object-contain rounded-lg shadow-lg"
             />
           ) : (
-            <p className="text-sm text-gray-300">Loading preview...</p>
+            <p className="text-sm text-slate-300">Loading preview...</p>
           )}
         </div>
       </div>
